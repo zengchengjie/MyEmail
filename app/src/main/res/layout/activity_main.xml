@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:padding="20px">
+
+        <Button
+            android:layout_width="180px"
+            android:layout_height="70px"
+            android:background="@color/colorPrimaryDark"
+            android:text="返回"
+            android:textColor="@color/white"
+            android:textSize="30px" />
+
+        <TextView
+            android:layout_width="180px"
+            android:layout_height="90px"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="新邮件"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <Button
+            android:layout_width="180px"
+            android:layout_height="70px"
+            android:layout_alignParentRight="true"
+            android:background="@color/colorPrimaryDark"
+            android:text="发送"
+            android:textColor="@color/white"
+            android:textSize="30px" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20px">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="90px">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="收件人："
+                android:textSize="30px" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="90px">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="发件人："
+                android:textSize="30px" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="90px">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="主题："
+                android:textSize="30px" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <Button
+                android:layout_width="150px"
+                android:layout_height="60px"
+                android:layout_alignParentRight="true"
+                android:background="@color/blue"
+                android:textColor="@color/white"
+                android:text="附件"/>
+        </RelativeLayout>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/edit_bg"
+            android:gravity="left"
+            android:hint="正文"
+            android:padding="10px"/>
+    </LinearLayout>
+</LinearLayout>
