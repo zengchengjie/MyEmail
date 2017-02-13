@@ -38,9 +38,16 @@ public class MailInfo implements Serializable {
 	public Properties getProperties() {
 
 		Properties props = new Properties();
-		props.setProperty("mail.store.protocol", "imap");
-		props.setProperty("mail.imap.host", "imap.163.com");
-		props.setProperty("mail.imap.port", "143");
+		props.put("mail.smtp.host", this.mailServerHost);
+		props.put("mail.smtp.port", this.mailServerPort);
+		props.put("mail.smtp.auth", validate ? "true" : "false");
+		/**  QQ邮箱需要建立ssl连接 */
+		props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		props.setProperty("mail.imap.socketFactory.fallback", "false");
+		props.setProperty("mail.imap.starttls.enable","true");
+//		props.setProperty("mail.store.protocol", "imap");
+//		props.setProperty("mail.imap.host", "imap.163.com");
+//		props.setProperty("mail.imap.port", "143");
 		return props;
 	}
 

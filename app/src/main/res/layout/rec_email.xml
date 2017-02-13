@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="50px"
+        android:text="收件箱"
+        android:textSize="40px" />
+
+    <TextView
+        android:id="@+id/text_rec"
+        android:layout_width="match_parent"
+        android:layout_height="600px"
+        android:padding="30px" />
+
+    <Button
+        android:id="@+id/createFolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="创建文件夹" />
+    <Button
+        android:id="@+id/deleteFolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="删除文件夹" />
+    <Button
+        android:id="@+id/renameFolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="重命名文件夹" />
+    <Button
+        android:id="@+id/moveMail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="移动邮件" />
+</LinearLayout>

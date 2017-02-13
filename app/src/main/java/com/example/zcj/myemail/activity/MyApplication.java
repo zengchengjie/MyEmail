@@ -12,18 +12,19 @@ import javax.mail.Session;
 import javax.mail.Store;
 
 public class MyApplication extends Application {
-	public static Session session = null;
-	public static Store getStore() {
-		return store;
-	}
+    public static Session session = null;
+    private static Store store;
 
-	public static void setStore(Store store) {
-		MyApplication.store = store;
-	}
+    public static Store getStore() {
+        return store;
+    }
 
-	public static MailInfo info=new MailInfo();
-	
-	private static Store store;
+    public static void setStore(Store store) {
+        MyApplication.store = store;
+    }
+
+    public static MailInfo info = new MailInfo();
+
     private ArrayList<InputStream> attachmentsInputStreams;
 
     public ArrayList<InputStream> getAttachmentsInputStreams() {
@@ -33,5 +34,5 @@ public class MyApplication extends Application {
     public void setAttachmentsInputStreams(ArrayList<InputStream> attachmentsInputStreams) {
         this.attachmentsInputStreams = attachmentsInputStreams;
     }
-	
+
 }
