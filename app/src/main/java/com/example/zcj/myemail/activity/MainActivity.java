@@ -36,6 +36,7 @@ public class MainActivity extends ActivityBase implements View.OnClickListener{
                new MailEditActivity().sendThreeEmail();
                 break;
             case R.id.turnToRec:
+
                 intent.setClass(MainActivity.this,RecEmailActivity.class);
                 break;
             case R.id.contactList:

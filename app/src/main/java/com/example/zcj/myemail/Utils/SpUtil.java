@@ -13,6 +13,8 @@ public class SpUtil {
     private static final String SPKEY_REMENBER = "isRbPwd";
     private static final String SPKEY_ADD = "address";
     private static final String SPKEY_PWD = "password";
+    private static final String SP_NAME = "name";
+    private static final String SPKEY_NAME = "nameKey";
 
     //是否记住密码
     public static void putIsRbPwd(Context context, Boolean b) {
@@ -25,7 +27,6 @@ public class SpUtil {
         return sp.getBoolean(SPKEY_REMENBER, false);
     }
     //记住地址
-
     public static void putAddress(Context context, String str) {
         SharedPreferences sp = context.getSharedPreferences(SP_CONFIG, Context.MODE_PRIVATE);
         sp.edit().putString(SPKEY_ADD, str);
@@ -45,5 +46,15 @@ public class SpUtil {
     public static String getPwd(Context context) {
         SharedPreferences sp = context.getSharedPreferences(SP_CONFIG, Context.MODE_PRIVATE);
         return sp.getString(SPKEY_PWD, "");
+    }
+    //记住文件夹名字
+    public static void putName(Context context, String str) {
+        SharedPreferences sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
+        sp.edit().putString(SPKEY_NAME, str);
+    }
+
+    public static String getName(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
+        return sp.getString(SPKEY_NAME, "");
     }
 }

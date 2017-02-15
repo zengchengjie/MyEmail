@@ -11,7 +11,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.zcj.myemail.R;
+import com.example.zcj.myemail.bean.MailReceiver;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.mail.Flags;
@@ -21,6 +24,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
+import javax.mail.internet.MimeMessage;
 
 /**
  * Created by zcj on 2017/2/9.
@@ -104,7 +108,7 @@ public class RecEmailActivity extends ActivityBase implements View.OnClickListen
         store.connect(MyApplication.info.getUserName(), MyApplication.info.getPassword());
     }
 
-    public boolean IMAPRecMail() throws MessagingException {
+    public void IMAPRecMail() throws MessagingException, IOException {
 //        Folder [] folders =store.getDefaultFolder().list();
 //        Log.d(TAG, "执行   folders: "+folders);
         //遍历文件夹
@@ -114,10 +118,18 @@ public class RecEmailActivity extends ActivityBase implements View.OnClickListen
 //        Log.d(TAG, "RecMailText: \n"+RecMailText);
 
         // 获得收件箱
-//        folder = store.getFolder("INBOX.create");
-        folder = store.getDefaultFolder();
+        folder = store.getFolder("INBOX");// 获得收件箱的邮件列表
+        javax.mail.Message[] messages = folder.getMessages(1, 3);
+        for (int i = 0; i < messages.length; i++) {
+            // 自定义的邮件对象
+            MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
+            reciveMail.getAttachmentsInputStreams();
+        }
+//        InputStream in =  messages[1].getSentDate();
+//        messages
+//        folder = store.getDefaultFolder();
 
-        return createFolder(folder, "测试新建");
+//        return createFolder(folder, "测试新建");
 
 
         // 以读写模式打开收件箱
@@ -146,10 +158,10 @@ public class RecEmailActivity extends ActivityBase implements View.OnClickListen
 //            messages[i].
 //            folder.get
         }*/
-   /*     Log.d(TAG, "收件箱中共" + messages.length + "封邮件!\n\n"
+        Log.d(TAG, "收件箱中共" + messages.length + "封邮件!\n\n"
                 + "收件箱中共" + folder.getUnreadMessageCount() + "封未读邮件!\n\n"
                 + "收件箱中共" + folder.getNewMessageCount() + "封新邮件!\n\n"
-                + "收件箱中共" + folder.getDeletedMessageCount() + "封已删除邮件!");*/
+                + "收件箱中共" + folder.getDeletedMessageCount() + "封已删除邮件!");
 
         /*
         // 打印不同状态的邮件数量

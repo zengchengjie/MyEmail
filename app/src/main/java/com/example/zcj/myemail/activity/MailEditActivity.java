@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -26,15 +27,28 @@ import android.widget.Toast;
 import com.example.zcj.myemail.R;
 import com.example.zcj.myemail.Utils.Attachment;
 import com.example.zcj.myemail.Utils.HttpUtil;
+import com.example.zcj.myemail.Utils.MailReciver;
+import com.example.zcj.myemail.Utils.SpUtil;
 import com.example.zcj.myemail.Utils.UriUtil;
 import com.example.zcj.myemail.adapter.GridViewAdapter;
+import com.example.zcj.myemail.bean.MailReceiver;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.internet.MimeMessage;
 
 public class MailEditActivity extends Activity implements OnClickListener {
-    private static final String TAG = "sessionTest";
+    private static final String TAG = "sessionTest-";
     private EditText mail_to;
     private EditText mail_from;
     private EditText mail_topic;
@@ -46,6 +60,8 @@ public class MailEditActivity extends Activity implements OnClickListener {
     private GridView gridView;
     private GridViewAdapter<Attachment> adapter = null;
     private int mailid = -1;
+    private Button turnToRec;
+    private static String newFolderName = "";
 
     private static final int SUCCESS = 1;
     private static final int FAILED = -1;
@@ -106,11 +122,13 @@ public class MailEditActivity extends Activity implements OnClickListener {
         attachment = (ImageButton) findViewById(R.id.add_att);
         add_lianxiren = (ImageButton) findViewById(R.id.add_lianxiren);
         gridView = (GridView) findViewById(R.id.pre_view);
+        turnToRec = (Button) findViewById(R.id.turnToRec);
 
         mail_from.setText(MyApplication.info.getUserName());
         send.setOnClickListener(this);
         attachment.setOnClickListener(this);
         add_lianxiren.setOnClickListener(this);
+        turnToRec.setOnClickListener(this);
 
         adapter = new GridViewAdapter<Attachment>(this);
         gridView.setAdapter(adapter);
@@ -149,30 +167,35 @@ public class MailEditActivity extends Activity implements OnClickListener {
         }
     }
 
+    //————————————————————————————————————————————————————————————————————————————————————————————————
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            //发送
             case R.id.send:
                 sendThreeEmail();
-
-
-//                sendMail();
                 break;
-            case R.id.add_att:
-                addAttachment();
-                break;
-            case R.id.add_lianxiren:
-                //联系人
-                Toast.makeText(MailEditActivity.this, "联系人", Toast.LENGTH_SHORT).show();
+            //接收
+            case R.id.turnToRec:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            RecMail();
+                        } catch (MessagingException e) {
+                            e.printStackTrace();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
                 break;
         }
 
     }
 
     public void sendThreeEmail() {
-
         List<Attachment> mList = new ArrayList<>();
-
         File s = new File("/sdcard/xcxCase/");
         File[] files = s.listFiles();
 
@@ -185,18 +208,162 @@ public class MailEditActivity extends Activity implements OnClickListener {
             }
             mList.add(affInfos);
             sendMail(mList);
-//            for (int i = 0; i < files.length; i++) {
-//                File file = files[i];
-//                Attachment affInfos = Attachment.GetFileInfo(file.getPath());
-//                if (affInfos == null) {
-//                    return;
-//                }
-//                mList.add(affInfos);
-//                sendMail(mList);
-//            }
         }
     }
 
+
+    public void RecMail() throws Exception {
+
+
+        // 准备连接服务器的会话信息
+        Properties props = new Properties();
+        props.setProperty("mail.store.protocol", "imap");
+        props.setProperty("mail.imap.host", "imap.qq.com");
+//        props.setProperty("mail.imap.host", "imap.163.com");
+        props.setProperty("mail.imap.port", "143");
+
+        /**  QQ邮箱需要建立ssl连接 */
+        props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.setProperty("mail.imap.socketFactory.fallback", "false");
+        props.setProperty("mail.imap.starttls.enable", "true");
+        props.setProperty("mail.imap.socketFactory.port", "993");
+
+        // 创建Session实例对象
+        Session session = Session.getInstance(props);
+
+        // 创建IMAP协议的Store对象
+        Store store = session.getStore("imap");
+        // 连接邮件服务器
+        store.connect(MyApplication.info.getUserName(), MyApplication.info.getPassword());
+        // 获得收件箱
+        Folder folder = store.getFolder("INBOX");// 获得收件箱的邮件列表
+        folder.open(Folder.READ_WRITE);
+        javax.mail.Message[] msgs = folder.getMessages();
+        javax.mail.Message[] message = folder.getMessages(msgs.length - 9, msgs.length);
+        Log.d(TAG, "收件箱中邮件数目        : " + msgs.length);
+        List<Integer> targetEmail = new ArrayList<>();
+        for (int i = message.length - 1; i >= 0; i--) {
+            // 自定义的邮件对象
+            MailReciver re = new MailReciver((MimeMessage) message[i]);
+            /*Log.d(TAG, "邮件对象    : "+re);
+            Log.d(TAG, "邮件　" + i + "　主题:　" + re.getSubject()
+                    + "邮件　" + i + "　发送时间:　" + re.getSentDate()
+                    + "邮件　" + i + "　是否需要回复:　" + re.getReplySign()
+                    + "邮件　" + i + "　是否已读:　" + re.isNew()
+                    +"邮件　" + i + "　是否包含附件:　"+ re.isContainAttach(message[i])
+                    + "邮件　" + i + "　发送人地址:　" + re.getFrom()
+                    + "邮件　" + i + "　收信人地址:　" + re.getMailAddress("to")
+                    + "邮件　" + i + "　抄送:　" + re.getMailAddress("cc")
+                    + "邮件　" + i + "　暗抄:　" + re.getMailAddress("bcc")
+                    + "yy年MM月dd日　HH:mm"
+                    + "邮件　" + i + "　发送时间:　" + re.getSentDate()
+                    + "邮件　" + i + "　邮件ID:　" + re.getMessageId());
+
+            re.getMailContent(message[i]);*/
+//            Log.d(TAG, "邮件　" + i + "　正文内容:　\n\n" + re.getBodyText()+"发送时间   ："+re.getSentDate());
+//            Log.d(TAG, "第　" + (i+1) +"   封邮件发送时间   ："+re.getSentDate()+"   主题："+re.getSubject());
+
+
+            if (re.getSubject().toString().equals("MainTheme")) {
+//                ————————————保存附件————————————————
+                Log.d(TAG, "目标邮件是第 " + i + " 封邮件" + folder);
+                targetEmail.add(msgs.length - 9 + i);
+//            re.setAttachPath("/sdcard/xcxCase/temp/");
+//            re.saveAttachMent(message[i]);
+            }
+        }
+        if (targetEmail.size() > 0) {
+            Folder create = store.getDefaultFolder();
+
+            newFolderName = "test" + (int) (Math.random() * 1000);
+
+            if (createFolder(create, newFolderName)) {
+
+                //遍历文件夹
+                String s = "";
+                Folder[] folders = store.getDefaultFolder().list();
+                for (Folder f : folders) {
+                    s += "folder.getName():     " + f.getName() + "\n";
+                }
+                Log.d(TAG, "文件夹 : \n" + s);
+                store.close();
+
+                Store newstore = session.getStore("imap");
+                newstore.connect(MyApplication.info.getUserName(), MyApplication.info.getPassword());
+
+
+                // 获得收件箱
+                Folder newFolder = newstore.getFolder(newFolderName);// 获得收件箱的邮件列表
+                //打开 移动 复制
+                newFolder.open(Folder.READ_WRITE);
+
+
+                Folder inboxFolder = newstore.getFolder("INBOX");
+                inboxFolder.open(Folder.READ_WRITE);
+
+                for (int i = 0; i < targetEmail.size(); i++) {
+                    int position = targetEmail.get(i);
+                    Log.d(TAG, "要移动的文件位置    : " + position);
+                    javax.mail.Message[] moveMsg = inboxFolder.getMessages(position, position);
+                    Log.d(TAG, "newFolder   : " + newFolder);
+
+                    inboxFolder.copyMessages(moveMsg, newFolder);
+                    Log.d(TAG, "执行完复制任务: ");
+                    inboxFolder.setFlags(moveMsg, new Flags(Flags.Flag.DELETED), true);//删除源文件夹下的邮件
+                }
+
+
+                newFolder.close(true);
+                inboxFolder.close(true);
+                newstore.close();
+
+
+                Store fujiantore = session.getStore("imap");
+                fujiantore.connect(MyApplication.info.getUserName(), MyApplication.info.getPassword());
+                // 获得收件箱
+                Folder fujianFolder = fujiantore.getFolder(newFolderName);// 获得收件箱的邮件列表
+                //打开 移动 复制
+                fujianFolder.open(Folder.READ_WRITE);
+                //附件
+                javax.mail.Message[] mm = fujianFolder.getMessages();
+                for (int i = 0; i < mm.length; i++) {
+                    // 自定义的邮件对象
+                    MailReciver re = new MailReciver((MimeMessage) message[i]);
+                    re.setAttachPath("/sdcard/xcxCase/temp/");
+                    re.saveAttachMent(mm[i]);
+                }
+
+                fujianFolder.close(true);
+                fujiantore.close();
+            }
+//                Folder newFolder = store.getFolder(newName.toString());
+
+//                Log.d(TAG, "newFolder: " + newName.toString() +"    收件箱对象：  " + folder);
+//                newFolder.open(Folder.READ_WRITE);
+
+
+        }
+    }
+
+
+    private boolean createFolder(Folder parent, String folderName) {
+        boolean isCreated = true;
+
+        try {
+            Folder newFolder = parent.getFolder(folderName);
+            isCreated = newFolder.create(Folder.HOLDS_MESSAGES);
+            Log.d(TAG, "created: " + isCreated);
+//            System.out.println("created: " + isCreated);
+
+        } catch (Exception e) {
+            Log.d(TAG, "Error creating folder: " + e.getMessage());
+//            System.out.println("Error creating folder: " + e.getMessage());
+            e.printStackTrace();
+            isCreated = false;
+        }
+        return isCreated;
+    }
+//————————————————————————————————————————————————————————————————————————————————————————————————————
 
     /**
      * 添加附件
@@ -268,8 +435,8 @@ public class MailEditActivity extends Activity implements OnClickListener {
 //        MyApplication.info.setSubject(mail_topic.getText().toString().trim());
 //        MyApplication.info.setContent(mail_content.getText().toString().trim());
         MyApplication.info.setFromAddress("649011593@qq.com");
-        MyApplication.info.setSubject("主题".trim());
-        MyApplication.info.setContent("正文".toString().trim());
+        MyApplication.info.setSubject("MainTheme".trim());
+        MyApplication.info.setContent("MainContent".toString().trim());
         //收件人
 //        String str = mail_to.getText().toString().trim();
         String str = "649011593@qq.com";
