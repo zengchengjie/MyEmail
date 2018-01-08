@@ -29,4 +29,3 @@ dependencies {
     compile files('libs/activation.jar')
     compile files('libs/javax.mail.jar')
 }
-d
